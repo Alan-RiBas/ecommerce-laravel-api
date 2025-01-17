@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 class AuthController extends Controller
 {
     // User registration
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -37,7 +38,7 @@ class AuthController extends Controller
     }
 
     // User login
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
 
@@ -57,7 +58,7 @@ class AuthController extends Controller
     }
 
     // Get authenticated user
-    public function getUser()
+    public function getUser(): JsonResponse
     {
 
         try {
@@ -72,7 +73,7 @@ class AuthController extends Controller
     }
 
     // User logout
-    public function logout()
+    public function logout(): JsonResponse
     {
         JWTAuth::invalidate(JWTAuth::getToken());
 
@@ -98,7 +99,7 @@ class AuthController extends Controller
     }
 
     // update user role
-    public function updateUserRole($id, Request $request)
+    public function updateUserRole(int $id, Request $request): JsonResponse
     {
         try {
             $user = User::find($id);
@@ -119,7 +120,7 @@ class AuthController extends Controller
     }
 
     // update user profile
-    public function updateUserProfile(Request $request)
+    public function updateUserProfile(Request $request): JsonResponse
     {
         try {
 
@@ -160,5 +161,23 @@ class AuthController extends Controller
             return response()->json(['message' => 'Erro ao atualizar perfil', 'error' => $e->getMessage()], 500);
         }
     }
+
+    //show users
+    public function showAll(): JsonResponse
+    {
+        try {
+            $users = User::all();
+            if($users->isEmpty()){
+                return response()->json(['message' => 'Nenhum usuário encontrado'], 404);
+            }
+
+            return response()->json(compact('users'), 200);
+
+        } catch (\Exception $e) {
+            Log::error("Erro ao buscar usuários: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao buscar usuários'], 500);
+        }
+    }
+
 
 }

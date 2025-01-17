@@ -16,6 +16,7 @@ return new class extends Migration
             $table->text('bio')->nullable()->after('role'); // Adiciona 'bio' após o campo 'role'
             $table->string('profession')->nullable()->after('bio'); // Adiciona 'profession' após o campo 'bio'
             $table->string('profileImage')->nullable()->after('profession'); // Adiciona 'profile_image' após o campo 'profession'
+
         });
     }
 

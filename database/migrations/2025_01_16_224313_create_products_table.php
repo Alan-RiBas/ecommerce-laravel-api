@@ -21,9 +21,11 @@ return new class extends Migration
             $table->string('image');
             $table->string('color');
             $table->integer('rating')->default(0);
-            $table->foreignId('user_id')->constrained();
+            $table->unsignedBigInteger('author');
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('author')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

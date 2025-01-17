@@ -15,8 +15,7 @@ class Product extends Model
         'image',
         'color',
         'rating',
-        'user_id',
+        'author',
     ];
 
-    
 }
