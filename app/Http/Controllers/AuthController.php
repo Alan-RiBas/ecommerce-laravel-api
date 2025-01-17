@@ -118,5 +118,47 @@ class AuthController extends Controller
         }
     }
 
+    // update user profile
+    public function updateUserProfile(Request $request)
+    {
+        try {
+
+            $userId = $request->input('userId');
+            $name = $request->input('name');
+            $profileImage = $request->input('profileImage');
+            $bio = $request->input('bio');
+            $profession = $request->input('profession');
+
+            $user = User::find($userId);
+
+            if (!$user) {
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
+            }
+
+            if ($name !== null) {
+                $user->name = $name;
+            }
+            if ($profileImage !== null) {
+                $user->profileImage = $profileImage;
+            }
+            if ($bio !== null) {
+                $user->bio = $bio;
+            }
+            if ($profession !== null) {
+                $user->profession = $profession;
+            }
+
+            $user->save();
+
+            return response()->json([
+                'message' => 'Perfil atualizado com sucesso',
+                'user' => $user
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Erro ao atualizar perfil: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao atualizar perfil', 'error' => $e->getMessage()], 500);
+        }
+    }
 
 }
