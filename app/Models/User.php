@@ -22,6 +22,10 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
+        'role',
+        'bio',
+        'profileImage',
+        'profesion'
     ];
 
     /**
@@ -60,3 +64,4 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 }
+

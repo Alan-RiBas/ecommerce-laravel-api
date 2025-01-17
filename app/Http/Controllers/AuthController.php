@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -45,10 +46,8 @@ class AuthController extends Controller
                 return response()->json(['error' => 'Credenciais inválidas'], 401);
             }
 
-            // Get the authenticated user.
             $user = auth()->user();
 
-            // (optional) Attach the role to the token.
             $token = JWTAuth::claims(['role' => $user->role])->fromUser($user);
 
             return response()->json(compact('user' ,'token'));
@@ -80,5 +79,44 @@ class AuthController extends Controller
         return response()->json(['message' => 'Desconectado com sucesso']);
     }
 
-    //
+    //get user by id
+    public function getUserById(int $userId)
+    {
+        try {
+            $user = User::find($userId);
+
+            if (!$user) {
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
+            }
+
+            return response()->json(compact('user'), 200);
+
+        } catch (\Exception $e) {
+            Log::error("Erro ao buscar usuário: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao buscar usuário'], 500);
+        }
+    }
+
+    // update user role
+    public function updateUserRole($id, Request $request)
+    {
+        try {
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json(['message' => 'Usuário não encontrado'], 404);
+            }
+
+            $user->role = $request->input('role');
+            $user->save();
+
+            return response()->json(['message' => 'Usuário atualizado com sucesso'], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Erro ao atualizar usuário: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao atualizar usuário'], 500);
+        }
+    }
+
+
 }

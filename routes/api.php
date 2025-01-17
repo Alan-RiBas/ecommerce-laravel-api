@@ -11,5 +11,8 @@ Route::group(['prefix'=> 'auth'], function () {
     Route::middleware(['jwt'])->group(function () {
         Route::get('/me', [AuthController::class, 'getUser']);
         Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/users/{userId}', [AuthController::class, 'getUserById']);
+        Route::patch('/users/{userId}', [AuthController::class, 'updateUserRole']);
+        Route::patch('/edit-profile', [AuthController::class, 'updateUserRole']);
     });
 });
