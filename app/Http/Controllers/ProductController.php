@@ -156,7 +156,22 @@ class ProductController extends Controller
      */
     public function destroy(Product $productId): JsonResponse
     {
-        return response()->json("destroy");
+        try{
+            $product = Product::find($productId->id);
+            if(!$product){
+                return response()->json(['message' => 'Produto não encontrado'], 404);
+            }
+
+            if(!$product->delete()){
+                Log::error("Erro ao deletar produto");
+                return response()->json(['message' => 'Erro ao deletar produto'], 500);
+            }
+
+            return response()->json(['message' => 'Produto deletado com sucesso'], 200);
+        }catch(\Exception $e){
+            Log::error("Erro ao deletar produto: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao deletar produto'], 500);
+        }
     }
 
     /**
