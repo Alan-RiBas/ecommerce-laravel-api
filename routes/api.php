@@ -24,4 +24,4 @@ Route::group(['prefix' => 'products'], function () {
     Route::patch('/update-product/{productId}', [ProductController::class, 'update']);
     Route::delete('/delete-product/{productId}', [ProductController::class, 'destroy']);
     Route::get('/related/{productId}', [ProductController::class, 'related']);
-})->midleware('jwt',);
+});

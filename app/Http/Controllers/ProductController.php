@@ -14,10 +14,54 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function showAll(): JsonResponse
+    public function showAll(Request $request): JsonResponse
     {
-        return response()->json("showAll");
+        try {
+            $category = $request->query('category', 'all');
+            $color = $request->query('color', 'all');
+            $minPrice = $request->query('minPrice');
+            $maxPrice = $request->query('maxPrice');
+            $page = $request->query('page', 1);
+            $limit = $request->query('limit', 10);
+
+            $filter = [];
+
+            if ($category !== 'all') {
+                $filter['category'] = $category;
+            }
+
+            if ($color !== 'all') {
+                $filter['color'] = $color;
+            }
+
+            if ($minPrice && $maxPrice) {
+                $filter['price'] = ['>=', $minPrice, '<=', $maxPrice];
+            }
+
+            $skip = ($page - 1) * $limit;
+            $totalProducts = Product::where($filter)->count();
+            $totalPages = ceil($totalProducts / $limit);
+
+
+            $products = Product::where($filter)
+                ->skip($skip)
+                ->take($limit)
+                ->with('author:id,email')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'products' => $products,
+                'totalPages' => $totalPages,
+                'totalProducts' => $totalProducts,
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error("Erro ao buscar produtos: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao buscar produtos'], 500);
+        }
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -58,7 +102,7 @@ class ProductController extends Controller
     public function show(Product $productId): JsonResponse
     {
 
-        
+
         return response()->json("show");
     }
 
