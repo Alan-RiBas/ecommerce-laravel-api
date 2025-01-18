@@ -101,9 +101,31 @@ class ProductController extends Controller
      */
     public function show(Product $productId): JsonResponse
     {
+        try{
 
+            $product = Product::where('id', $productId->id)
+                ->with('author')
+                ->first();
+            if(!$product){
+                return response()->json(['message' => 'Produto não encontrado'], 404);
+            }
 
-        return response()->json("show");
+            $reviews = Review::where('product_id', $productId)
+                ->with('author')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // if($reviews->isNotEmpty()){
+            //     $product->reviews = $reviews;
+            // }
+
+            return response()->json(compact('product', 'reviews'), 200);
+
+        }catch(\Exception $e){
+            Log::error("Erro ao buscar produto: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao buscar produto'], 500);
+        }
+
     }
 
     /**
@@ -111,7 +133,22 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $productId): JsonResponse
     {
-        return response()->json("update");
+        try{
+            $product = Product::find($productId->id);
+            if(!$product){
+                return response()->json(['message' => 'Produto não encontrado'], 404);
+            }
+
+            if(!$product->update($request->all())){
+                Log::error("Erro ao atualizar produto");
+                return response()->json(['message' => 'Erro ao atualizar produto'], 500);
+            }
+
+            return response()->json(compact('product'), 200);
+        }catch(\Exception $e){
+            Log::error("Erro ao atualizar produto: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao atualizar produto'], 500);
+        }
     }
 
     /**
