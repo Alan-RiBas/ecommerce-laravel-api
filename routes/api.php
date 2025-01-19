@@ -21,7 +21,7 @@ Route::group(['prefix' => 'products'], function () {
     Route::get('/', [ProductController::class, 'showAll']);
     Route::get('/{productId}', [ProductController::class, 'show']);
     Route::get('/related/{productId}', [ProductController::class, 'related']);
-    Route::middleware(['jwt', 'verifyAdmin'])->group(function () {
+    Route::middleware(['jwt','verifyAdmin'])->group(function () {
         Route::post('/create-product', [ProductController::class, 'store']);
         Route::patch('/update-product/{productId}', [ProductController::class, 'update']);
         Route::delete('/delete-product/{productId}', [ProductController::class, 'destroy']);

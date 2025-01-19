@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
+
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VerifyAdminMiddleware
 {
@@ -15,11 +17,16 @@ class VerifyAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->user()->role === 'admin') {
-            return $next($request);
-        }
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
 
-        return response()->json(['message' => 'Você não tem permissão para acessar esta área.'], 403);
+            if ($user && $user->role === 'admin') {
+                return $next($request);
+            }
+            return response()->json(['message' => 'Acesso negado. Apenas administradores podem acessar esta rota.'], 403);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erro ao validar o token.'], 401);
+        }
 
         return $next($request);
     }

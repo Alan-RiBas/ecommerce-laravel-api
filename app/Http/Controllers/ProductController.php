@@ -88,8 +88,9 @@ class ProductController extends Controller
                 $newProduct->rating = $averageRating;
                 $newProduct->save();
             }
+            $message = "Produto criado com sucesso";
 
-            return response()->json(compact('newProduct'), 201);
+            return response()->json(compact('newProduct', 'message'), 201);
         } catch (\Exception $e) {
             Log::error("Erro ao criar novo produto: {$e->getMessage()}");
             return response()->json(['message' => 'Erro ao criar novo produto'], 500);
@@ -133,6 +134,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, int $productId): JsonResponse
     {
+
         try{
             $product = Product::find($productId);
             if(!$product){
@@ -211,6 +213,5 @@ class ProductController extends Controller
             Log::error("Erro ao buscar produtos relacionados: {$e->getMessage()}");
             return response()->json(['message' => 'Erro ao buscar produtos relacionados'], 500);
         }
-
     }
 }
