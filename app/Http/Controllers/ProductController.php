@@ -99,11 +99,11 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Product $productId): JsonResponse
+    public function show(int $productId): JsonResponse
     {
         try{
 
-            $product = Product::where('id', $productId->id)
+            $product = Product::where('id', $productId)
                 ->with('author')
                 ->first();
             if(!$product){
@@ -131,10 +131,10 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $productId): JsonResponse
+    public function update(Request $request, int $productId): JsonResponse
     {
         try{
-            $product = Product::find($productId->id);
+            $product = Product::find($productId);
             if(!$product){
                 return response()->json(['message' => 'Produto não encontrado'], 404);
             }
@@ -143,8 +143,8 @@ class ProductController extends Controller
                 Log::error("Erro ao atualizar produto");
                 return response()->json(['message' => 'Erro ao atualizar produto'], 500);
             }
-
-            return response()->json(compact('product'), 200);
+            $message = "Produto atualizado com sucesso";
+            return response()->json(compact('product', 'message'), 200);
         }catch(\Exception $e){
             Log::error("Erro ao atualizar produto: {$e->getMessage()}");
             return response()->json(['message' => 'Erro ao atualizar produto'], 500);
@@ -154,10 +154,10 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Product $productId): JsonResponse
+    public function destroy(int $productId): JsonResponse
     {
         try{
-            $product = Product::find($productId->id);
+            $product = Product::find($productId);
             if(!$product){
                 return response()->json(['message' => 'Produto não encontrado'], 404);
             }
@@ -177,8 +177,40 @@ class ProductController extends Controller
     /**
      * Display related products.
      */
-    public function related(Product $productId): JsonResponse
+    public function related(int $productId): JsonResponse
     {
-        return response()->json("related");
+
+        try {
+
+            if (!$productId) {
+                return response()->json(['message' => 'ID do produto não informado'], 400);
+            }
+
+            $product = Product::find($productId);
+
+            if (!$product) {
+                return response()->json(['message' => 'Produto não encontrado'], 404);
+            }
+
+            // Criar regex com base no nome do produto
+            $nameKeywords = array_filter(explode(' ', $product->name), function ($word) {
+                return strlen($word) > 0;
+            });
+            $nameRegex = implode('|', $nameKeywords);
+
+
+            $relatedProducts = Product::where('id', '!=', $productId)
+                ->where(function ($query) use ($nameRegex, $product) {
+                    $query->where('name', 'REGEXP', $nameRegex)
+                        ->orWhere('category', $product->category);
+                })->get();
+
+            return response()->json($relatedProducts, 200);
+
+        } catch (\Exception $e) {
+            Log::error("Erro ao buscar produtos relacionados: {$e->getMessage()}");
+            return response()->json(['message' => 'Erro ao buscar produtos relacionados'], 500);
+        }
+
     }
 }
