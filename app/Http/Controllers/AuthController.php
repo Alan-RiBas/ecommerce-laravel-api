@@ -40,11 +40,20 @@ class AuthController extends Controller
     // User login
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->only('email', 'password');
+
+        $email = $request->input('email');
+        $password = $request->input('password');
 
         try {
+            if(!$email){
+                return response()->json(['message' => 'O campo email é obrigatório.'], 400);
+            }
+            if(!$password){
+                return response()->json(['message' => 'O campo senha é obrigatório.'], 400);
+            }
+            $credentials = $request->only('email', 'password');
             if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'Credenciais inválidas'], 401);
+                return response()->json(['message' => 'Credenciais inválidas'], 401);
             }
 
             $user = auth()->user();
@@ -53,7 +62,7 @@ class AuthController extends Controller
 
             return response()->json(compact('user' ,'token'));
         } catch (JWTException $e) {
-            return response()->json(['error' => 'Não foi possível criar o token'], 500);
+            return response()->json(['message' => 'Não foi possível criar o token'], 500);
         }
     }
 

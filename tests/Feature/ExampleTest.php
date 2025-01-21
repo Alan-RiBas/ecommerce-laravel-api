@@ -1,7 +1,8 @@
 <?php
 
-it('returns a successful response', function () {
-    $response = $this->get('/');
+use function Pest\Laravel\getJson;
 
-    $response->assertStatus(200);
+it('Should return status code 200', function () {
+    getJson('/', ['Content-Type' => 'application/json'])
+        ->assertStatus(200);
 });
