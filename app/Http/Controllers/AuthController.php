@@ -40,6 +40,13 @@ class AuthController extends Controller
     // User login
     public function login(Request $request): JsonResponse
     {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
+        if($validator->fails()){
+            return response()->json($validator->errors(), 400);
+        }
 
         $email = $request->input('email');
         $password = $request->input('password');
